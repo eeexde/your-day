@@ -13,9 +13,10 @@ function maxConcurrency(entries: PlanEntry[], start: number, end: number): numbe
   let max = 0;
   for (let t = start; t < end; t += SNAP_MINUTES) {
     let c = 0;
+    const bucketEnd = Math.min(t + SNAP_MINUTES, end);
     for (const e of entries) {
       const es = timeToMinutes(e.start_time);
-      if (es < t + SNAP_MINUTES && es + e.duration_minutes > t) c += 1;
+      if (es < bucketEnd && es + e.duration_minutes > t) c += 1;
     }
     max = Math.max(max, c);
   }

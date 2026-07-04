@@ -92,3 +92,12 @@ test('activity that cannot fit before midnight is excluded', () => {
   const out = recommend([long], [], none, 23 * 60);
   expect(out).toHaveLength(0);
 });
+
+test('entry at exact window end should not count as overlapping (bucket clamping)', () => {
+  const busyAct = activity({});
+  const task = activity({ name: 'Task', default_duration_minutes: 45 });
+  const entries = [entry(busyAct.id, '08:45', 60)]; // 08:45–09:45
+  const out = recommend([task], entries, none, 8 * 60); // now = 08:00
+  // Window is 08:00–08:45 (zero concurrency since entry starts at exact end)
+  expect(out[0].proposedStartMinutes).toBe(8 * 60); // proposed at 08:00
+});
