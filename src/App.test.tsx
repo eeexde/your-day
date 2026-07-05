@@ -6,7 +6,8 @@ vi.mock('./lib/supabase', () => ({
     auth: {
       getSession: vi.fn(async () => ({ data: { session: null } })),
       onAuthStateChange: vi.fn(() => ({ data: { subscription: { unsubscribe: vi.fn() } } })),
-      signInWithOtp: vi.fn(),
+      signInWithPassword: vi.fn(),
+      signUp: vi.fn(),
       signInWithOAuth: vi.fn(),
       signOut: vi.fn(),
       getUser: vi.fn(async () => ({ data: { user: { id: 'u1' } }, error: null })),
@@ -91,7 +92,7 @@ afterEach(() => {
 
 test('renders sign-in screen when logged out', async () => {
   render(<App />);
-  expect(await screen.findByText(/sign in/i)).toBeInTheDocument();
+  expect((await screen.findAllByText(/sign in/i)).length).toBeGreaterThan(0);
 });
 
 test('logged in: loads today and renders the planner layout', async () => {

@@ -30,7 +30,7 @@ export function PoolPanel() {
     <section className="pool-panel">
       <div className="pool-header">
         <h3>Activities</h3>
-        <button onClick={() => { setEditing(null); setShowForm(true); }}>Add activity</button>
+        <button className="primary" onClick={() => { setEditing(null); setShowForm(true); }}>Add activity</button>
       </div>
       {showForm && (
         <ActivityForm

@@ -70,10 +70,10 @@ export function ActivityForm({ initial, onSubmit, onCancel, onArchive }: Props) 
         </label>
       )}
       <div className="form-actions">
-        <button type="submit">Save</button>
+        <button type="submit" className="primary">Save</button>
         <button type="button" onClick={onCancel}>Cancel</button>
         {initial && onArchive && (
-          <button type="button" onClick={onArchive}>Archive</button>
+          <button type="button" className="danger" onClick={onArchive}>Archive</button>
         )}
       </div>
     </form>
