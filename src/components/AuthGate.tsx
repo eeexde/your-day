@@ -47,8 +47,13 @@ export function AuthGate({ children }: { children: ReactNode }) {
           password,
           options: { emailRedirectTo: window.location.origin },
         });
-        if (error) setError(error.message);
-        else if (!data.session) setNotice('Account created. Check your email to confirm, then sign in.');
+        if (error) {
+          setError(error.message);
+        } else if (!data.session) {
+          // Emails are auto-confirmed server-side; finish sign-up with a direct sign-in.
+          const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+          if (signInError) setNotice('Account created. Check your email to confirm, then sign in.');
+        }
       }
     } finally {
       setPending(false);

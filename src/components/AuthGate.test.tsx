@@ -91,7 +91,7 @@ test('shows sign-in error message', async () => {
   expect(await screen.findByRole('alert')).toHaveTextContent('Invalid login credentials');
 });
 
-test('sign-up mode creates account and shows confirm notice', async () => {
+test('sign-up mode creates account and signs straight in', async () => {
   const user = userEvent.setup();
   render(<AuthGate><div>secret</div></AuthGate>);
   await user.click(await screen.findByRole('tab', { name: 'Create account' }));
@@ -103,5 +103,17 @@ test('sign-up mode creates account and shows confirm notice', async () => {
     password: 'hunter22',
     options: { emailRedirectTo: window.location.origin },
   });
+  expect(mockSignIn).toHaveBeenCalledWith({ email: 'new@example.com', password: 'hunter22' });
+  expect(screen.queryByText(/check your email/i)).not.toBeInTheDocument();
+});
+
+test('sign-up falls back to confirm notice when direct sign-in is rejected', async () => {
+  mockSignIn.mockResolvedValueOnce({ data: {}, error: { message: 'Email not confirmed' } } as any);
+  const user = userEvent.setup();
+  render(<AuthGate><div>secret</div></AuthGate>);
+  await user.click(await screen.findByRole('tab', { name: 'Create account' }));
+  await user.type(screen.getByLabelText('Email'), 'new@example.com');
+  await user.type(screen.getByLabelText('Password'), 'hunter22');
+  await user.click(screen.getByRole('button', { name: 'Create account' }));
   expect(await screen.findByText(/check your email to confirm/i)).toBeInTheDocument();
 });
