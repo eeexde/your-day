@@ -5,9 +5,10 @@ interface Props {
   initial: Activity | null;
   onSubmit: (input: NewActivity) => void;
   onCancel: () => void;
+  onArchive?: () => void;
 }
 
-export function ActivityForm({ initial, onSubmit, onCancel }: Props) {
+export function ActivityForm({ initial, onSubmit, onCancel, onArchive }: Props) {
   const [name, setName] = useState(initial?.name ?? '');
   const [color, setColor] = useState(initial?.color ?? '#4f6df5');
   const [priority, setPriority] = useState<1 | 2 | 3 | 4 | 5>(initial?.priority ?? 3);
@@ -71,6 +72,9 @@ export function ActivityForm({ initial, onSubmit, onCancel }: Props) {
       <div className="form-actions">
         <button type="submit">Save</button>
         <button type="button" onClick={onCancel}>Cancel</button>
+        {initial && onArchive && (
+          <button type="button" onClick={onArchive}>Archive</button>
+        )}
       </div>
     </form>
   );
