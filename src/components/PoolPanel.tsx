@@ -3,11 +3,19 @@ import { useDayStore } from '../store/day';
 import type { Activity, NewActivity } from '../types';
 import { ActivityForm } from './ActivityForm';
 import { PoolItem } from './PoolItem';
+import { snapMinutes, timeToMinutes, SNAP_MINUTES } from '../lib/time';
+
+function nextSlotMinutes(): number {
+  const d = new Date();
+  const now = d.getHours() * 60 + d.getMinutes();
+  return Math.min(snapMinutes(now + SNAP_MINUTES), 24 * 60 - SNAP_MINUTES);
+}
 
 export function PoolPanel() {
   const activities = useDayStore((s) => s.activities);
   const addActivity = useDayStore((s) => s.addActivity);
   const editActivity = useDayStore((s) => s.editActivity);
+  const addEntry = useDayStore((s) => s.addEntry);
   const archive = useDayStore((s) => s.archive);
   const [editing, setEditing] = useState<Activity | null>(null);
   const [showForm, setShowForm] = useState(false);
@@ -41,7 +49,15 @@ export function PoolPanel() {
         />
       )}
       {activities.map((a) => (
-        <PoolItem key={a.id} activity={a} onEdit={() => { setEditing(a); setShowForm(true); }} />
+        <PoolItem
+          key={a.id}
+          activity={a}
+          onEdit={() => { setEditing(a); setShowForm(true); }}
+          onPlace={() => {
+            const start = a.fixed_start_time ? timeToMinutes(a.fixed_start_time) : nextSlotMinutes();
+            addEntry(a.id, start, a.default_duration_minutes);
+          }}
+        />
       ))}
     </section>
   );
