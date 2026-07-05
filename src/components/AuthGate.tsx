@@ -2,29 +2,26 @@ import { useEffect, useState, type ReactNode, type FormEvent } from 'react';
 import type { Session } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
 
-export function useSession(): Session | null {
+export function useSession(): { session: Session | null; ready: boolean } {
   const [session, setSession] = useState<Session | null>(null);
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
       setSession(data.session);
+      setReady(true);
     });
     const { data } = supabase.auth.onAuthStateChange((_evt, s) => setSession(s));
     return () => data.subscription.unsubscribe();
   }, []);
 
-  return session;
+  return { session, ready };
 }
 
 export function AuthGate({ children }: { children: ReactNode }) {
-  const session = useSession();
-  const [ready, setReady] = useState(false);
+  const { session, ready } = useSession();
   const [email, setEmail] = useState('');
   const [sent, setSent] = useState(false);
-
-  useEffect(() => {
-    supabase.auth.getSession().then(() => setReady(true));
-  }, []);
 
   if (!ready) return null;
   if (session) return <>{children}</>;
