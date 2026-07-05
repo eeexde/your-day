@@ -1,5 +1,5 @@
 import { beforeEach, expect, test, vi } from 'vitest';
-import type { PlanEntry } from '../types';
+import type { Activity, PlanEntry } from '../types';
 
 vi.mock('../api', () => ({
   fetchActivities: vi.fn(async () => []),
@@ -130,4 +130,42 @@ test('dismiss adds id, loadDay resets dismissals', async () => {
   await useDayStore.getState().loadDay('2026-07-05');
   expect(useDayStore.getState().dismissedIds).toEqual([]);
   expect(mocked.ensureDayPlan).toHaveBeenCalledWith('2026-07-05');
+});
+
+test('addActivity keeps pool sorted by priority then name', async () => {
+  const existing: Activity[] = [
+    { id: 'a1', user_id: 'u', name: 'Bravo', color: '#000', priority: 2, default_duration_minutes: 60, fixed_start_time: null, is_archived: false },
+    { id: 'a2', user_id: 'u', name: 'Charlie', color: '#000', priority: 3, default_duration_minutes: 60, fixed_start_time: null, is_archived: false },
+  ];
+  useDayStore.setState({ activities: existing });
+
+  const newHigh: Activity = {
+    id: 'a3', user_id: 'u', name: 'Alpha', color: '#000', priority: 1, default_duration_minutes: 60, fixed_start_time: null, is_archived: false,
+  };
+  mocked.createActivity.mockResolvedValue(newHigh);
+
+  await useDayStore.getState().addActivity({ name: 'Alpha', color: '#000', priority: 1, default_duration_minutes: 60, fixed_start_time: null });
+
+  const activities = useDayStore.getState().activities;
+  expect(activities.map((a) => a.id)).toEqual(['a3', 'a1', 'a2']);
+  expect(activities.map((a) => a.priority)).toEqual([1, 2, 3]);
+});
+
+test('editActivity keeps pool sorted by priority then name after priority change', async () => {
+  const existing: Activity[] = [
+    { id: 'a1', user_id: 'u', name: 'Bravo', color: '#000', priority: 2, default_duration_minutes: 60, fixed_start_time: null, is_archived: false },
+    { id: 'a2', user_id: 'u', name: 'Zulu', color: '#000', priority: 3, default_duration_minutes: 60, fixed_start_time: null, is_archived: false },
+  ];
+  useDayStore.setState({ activities: existing });
+
+  const edited: Activity = {
+    id: 'a2', user_id: 'u', name: 'Zulu', color: '#000', priority: 1, default_duration_minutes: 60, fixed_start_time: null, is_archived: false,
+  };
+  mocked.updateActivity.mockResolvedValue(edited);
+
+  await useDayStore.getState().editActivity('a2', { priority: 1 });
+
+  const activities = useDayStore.getState().activities;
+  expect(activities.map((a) => a.id)).toEqual(['a2', 'a1']);
+  expect(activities.map((a) => a.priority)).toEqual([1, 2]);
 });

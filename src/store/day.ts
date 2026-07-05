@@ -27,6 +27,13 @@ function toast(message: string) {
   useToastStore.getState().push(message);
 }
 
+function sortActivitiesByPriority(activities: Activity[]): Activity[] {
+  return [...activities].sort((a, b) => {
+    if (a.priority !== b.priority) return a.priority - b.priority;
+    return a.name.localeCompare(b.name);
+  });
+}
+
 export const useDayStore = create<DayStore>((set, get) => {
   async function optimisticEntryUpdate(
     id: string,
@@ -117,7 +124,7 @@ export const useDayStore = create<DayStore>((set, get) => {
     addActivity: async (input) => {
       try {
         const created = await api.createActivity(input);
-        set((s) => ({ activities: [...s.activities, created] }));
+        set((s) => ({ activities: sortActivitiesByPriority([...s.activities, created]) }));
       } catch (err) {
         toast(`Add activity failed: ${(err as Error).message}`);
       }
@@ -126,7 +133,7 @@ export const useDayStore = create<DayStore>((set, get) => {
     editActivity: async (id, patch) => {
       try {
         const saved = await api.updateActivity(id, patch);
-        set((s) => ({ activities: s.activities.map((a) => (a.id === id ? saved : a)) }));
+        set((s) => ({ activities: sortActivitiesByPriority(s.activities.map((a) => (a.id === id ? saved : a))) }));
       } catch (err) {
         toast(`Update failed: ${(err as Error).message}`);
       }
