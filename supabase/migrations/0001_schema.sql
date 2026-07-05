@@ -52,9 +52,15 @@ create policy "own day_plans" on public.day_plans
   for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
 create policy "own plan_entries" on public.plan_entries
   for all using (exists (select 1 from public.day_plans p where p.id = day_plan_id and p.user_id = auth.uid()))
-  with check (exists (select 1 from public.day_plans p where p.id = day_plan_id and p.user_id = auth.uid()));
+  with check (
+    exists (select 1 from public.day_plans p where p.id = day_plan_id and p.user_id = auth.uid())
+    and exists (select 1 from public.activities a where a.id = activity_id and a.user_id = auth.uid())
+  );
 create policy "own templates" on public.templates
   for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
 create policy "own template_entries" on public.template_entries
   for all using (exists (select 1 from public.templates t where t.id = template_id and t.user_id = auth.uid()))
-  with check (exists (select 1 from public.templates t where t.id = template_id and t.user_id = auth.uid()));
+  with check (
+    exists (select 1 from public.templates t where t.id = template_id and t.user_id = auth.uid())
+    and exists (select 1 from public.activities a where a.id = activity_id and a.user_id = auth.uid())
+  );
