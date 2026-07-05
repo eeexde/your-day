@@ -15,6 +15,7 @@ export function computeReminders(
 ): Reminder[] {
   const byId = new Map(activities.map((a) => [a.id, a]));
   return entries.flatMap((e) => {
+    if (e.done) return [];
     const activity = byId.get(e.activity_id);
     if (!activity || activity.fixed_start_time === null) return [];
     const start = timeToMinutes(e.start_time);

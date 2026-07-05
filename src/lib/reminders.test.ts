@@ -23,6 +23,12 @@ test('skips entries starting within 10 minutes or in the past', () => {
   expect(out).toHaveLength(0);
 });
 
+test('skips entries already marked done', () => {
+  const doneEntry = { ...ent('a1', '14:00:00'), done: true };
+  const out = computeReminders([doneEntry], [fixedAct], 13 * 60);
+  expect(out).toHaveLength(0);
+});
+
 test('scheduleReminders fires notify and cancel stops pending', () => {
   vi.useFakeTimers();
   const notify = vi.fn();

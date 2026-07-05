@@ -23,6 +23,7 @@ function Planner() {
   const loadDay = useDayStore((s) => s.loadDay);
   const entries = useDayStore((s) => s.entries);
   const activities = useDayStore((s) => s.activities);
+  const date = useDayStore((s) => s.date);
   const [nowMinutes, setNowMinutes] = useState(nowMinutesLocal);
 
   useEffect(() => {
@@ -36,6 +37,7 @@ function Planner() {
 
   useEffect(() => {
     if (!('Notification' in window)) return;
+    if (date !== todayISO()) return;
     let cancel: (() => void) | undefined;
     let disposed = false;
     Notification.requestPermission().then(() => {
@@ -46,7 +48,7 @@ function Planner() {
       disposed = true;
       cancel?.();
     };
-  }, [entries, activities]);
+  }, [entries, activities, date]);
 
   return (
     <DayDnd>
