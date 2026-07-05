@@ -137,48 +137,99 @@ input[type='color'] { width: 42px; height: 28px; border-radius: 6px; cursor: poi
   margin-bottom: 10px;
 }
 
-/* ——— app shell ——— */
+/* ——— app shell (mobile-first) ——— */
 
-.app-shell { display: flex; flex-direction: column; height: 100vh; }
+.app-shell { display: flex; flex-direction: column; height: 100svh; }
 .panes { display: flex; flex: 1; min-height: 0; }
-.left-pane { flex: 2; min-width: 0; }
+.left-pane { flex: 1; min-width: 0; }
 .right-pane {
   flex: 1;
-  max-width: 380px;
-  padding: 20px;
+  min-width: 0;
+  padding: 16px 16px calc(76px + env(safe-area-inset-bottom));
   overflow-y: auto;
-  border-left: 1px solid var(--hairline);
   background: var(--paper-raised);
 }
+.panes.view-day .right-pane { display: none; }
+.panes.view-plan .left-pane { display: none; }
 
-/* ——— top bar ——— */
+.mobile-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 5;
+  display: flex;
+  gap: 6px;
+  padding: 8px 16px calc(8px + env(safe-area-inset-bottom));
+  background: var(--paper-raised);
+  border-top: 1px solid var(--hairline);
+}
+.mobile-nav button {
+  flex: 1;
+  padding: 10px 0;
+  font-size: 14px;
+  border: none;
+  color: var(--muted);
+}
+.mobile-nav button.active {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+/* ——— top bar (mobile-first) ——— */
 
 .top-bar {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
   align-items: center;
-  padding: 12px 20px;
+  padding: 10px 12px;
   border-bottom: 1px solid var(--hairline);
   background: var(--paper-raised);
 }
-.top-bar::before {
-  content: 'Your Day';
-  font-family: var(--display);
-  font-style: italic;
-  font-weight: 500;
-  font-size: 20px;
-  color: var(--ink);
-  margin-right: 12px;
-}
-.top-bar input[type='date'] { font-weight: 600; }
+.top-bar input[type='date'] { font-weight: 600; flex: 1; min-width: 130px; }
 .stats-chip {
-  margin-left: auto;
-  font-size: 12.5px;
+  font-size: 12px;
   font-variant-numeric: tabular-nums;
   color: var(--muted);
   white-space: nowrap;
+  order: 10;
+  width: 100%;
+  text-align: center;
 }
-.signout { margin-left: 8px; }
+.signout { margin-left: auto; }
+
+/* timeline needs bottom room above the fixed nav on mobile */
+.left-pane .timeline-scroll { padding-bottom: calc(68px + env(safe-area-inset-bottom)); }
+
+/* ——— desktop ——— */
+
+@media (min-width: 900px) {
+  .panes.view-day .right-pane,
+  .panes.view-plan .left-pane { display: block; }
+  .left-pane { flex: 2; }
+  .right-pane {
+    max-width: 380px;
+    padding: 20px;
+    border-left: 1px solid var(--hairline);
+  }
+  .mobile-nav { display: none; }
+  .left-pane .timeline-scroll { padding-bottom: 0; }
+
+  .top-bar { flex-wrap: nowrap; padding: 12px 20px; }
+  .top-bar::before {
+    content: 'Your Day';
+    font-family: var(--display);
+    font-style: italic;
+    font-weight: 500;
+    font-size: 20px;
+    color: var(--ink);
+    margin-right: 12px;
+  }
+  .top-bar input[type='date'] { flex: 0 1 auto; }
+  .stats-chip { order: 0; width: auto; margin-left: auto; font-size: 12.5px; }
+  .signout { margin-left: 8px; }
+}
 
 /* ——— timeline ——— */
 
@@ -242,7 +293,7 @@ input[type='color'] { width: 42px; height: 28px; border-radius: 6px; cursor: poi
 }
 .entry-block:hover { box-shadow: var(--shadow-lift); }
 .entry-block.done { opacity: 0.45; text-decoration: line-through; }
-.entry-head { display: flex; gap: 5px; align-items: center; }
+.entry-head { display: flex; gap: 5px; align-items: center; touch-action: manipulation; }
 .entry-name {
   font-weight: 700;
   flex: 1;
@@ -263,7 +314,7 @@ input[type='color'] { width: 42px; height: 28px; border-radius: 6px; cursor: poi
 }
 .entry-head button:hover { opacity: 1; }
 .entry-range { font-size: 11px; opacity: 0.9; font-variant-numeric: tabular-nums; }
-.resize-handle { position: absolute; bottom: 0; left: 0; right: 0; height: 8px; cursor: ns-resize; }
+.resize-handle { position: absolute; bottom: 0; left: 0; right: 0; height: 12px; cursor: ns-resize; touch-action: none; }
 
 /* ——— pool ——— */
 
@@ -281,6 +332,7 @@ input[type='color'] { width: 42px; height: 28px; border-radius: 6px; cursor: poi
   cursor: grab;
   box-shadow: var(--shadow-soft);
   transition: box-shadow 0.15s ease, border-color 0.15s ease;
+  touch-action: manipulation;
 }
 .pool-item:hover { box-shadow: var(--shadow-lift); border-color: var(--hairline-strong); }
 .pool-item:active { cursor: grabbing; }

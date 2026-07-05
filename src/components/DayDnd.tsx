@@ -1,5 +1,13 @@
 import { type ReactNode } from 'react';
-import { DndContext, useDroppable, type DragEndEvent } from '@dnd-kit/core';
+import {
+  DndContext,
+  useDroppable,
+  useSensor,
+  useSensors,
+  MouseSensor,
+  TouchSensor,
+  type DragEndEvent,
+} from '@dnd-kit/core';
 import { resolveDrop, type DropPayload } from '../lib/dnd';
 import { useDayStore } from '../store/day';
 import { useToastStore } from '../store/toast';
@@ -18,6 +26,11 @@ export function DayDnd({ children }: { children: ReactNode }) {
   const addEntry = useDayStore((s) => s.addEntry);
   const moveEntry = useDayStore((s) => s.moveEntry);
   const push = useToastStore((s) => s.push);
+  const sensors = useSensors(
+    useSensor(MouseSensor, { activationConstraint: { distance: 4 } }),
+    // Long-press to drag on touch so normal scrolling still works.
+    useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 8 } }),
+  );
 
   function handleDragEnd(evt: DragEndEvent) {
     if (evt.over?.id !== 'timeline') return;
@@ -44,5 +57,5 @@ export function DayDnd({ children }: { children: ReactNode }) {
     }
   }
 
-  return <DndContext onDragEnd={handleDragEnd}>{children}</DndContext>;
+  return <DndContext sensors={sensors} onDragEnd={handleDragEnd}>{children}</DndContext>;
 }

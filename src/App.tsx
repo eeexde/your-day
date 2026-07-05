@@ -25,6 +25,7 @@ function Planner() {
   const activities = useDayStore((s) => s.activities);
   const date = useDayStore((s) => s.date);
   const [nowMinutes, setNowMinutes] = useState(nowMinutesLocal);
+  const [view, setView] = useState<'day' | 'plan'>('day');
 
   useEffect(() => {
     loadDay(todayISO());
@@ -54,7 +55,7 @@ function Planner() {
     <DayDnd>
       <div className="app-shell">
         <TopBar />
-        <div className="panes">
+        <div className={`panes view-${view}`}>
           <main className="left-pane">
             <Timeline nowMinutes={nowMinutes} />
           </main>
@@ -63,6 +64,14 @@ function Planner() {
             <PoolPanel />
           </aside>
         </div>
+        <nav className="mobile-nav" aria-label="View">
+          <button className={view === 'day' ? 'active' : ''} onClick={() => setView('day')}>
+            Day
+          </button>
+          <button className={view === 'plan' ? 'active' : ''} onClick={() => setView('plan')}>
+            Plan
+          </button>
+        </nav>
       </div>
     </DayDnd>
   );
