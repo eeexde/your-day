@@ -162,7 +162,6 @@ code {
 .panes { display: flex; flex: 1; min-height: 0; }
 .left-pane { flex: 2; min-width: 0; }
 .right-pane { flex: 1; max-width: 380px; padding: 16px; overflow-y: auto; border-left: 1px solid var(--border); }
-.timeline-drop { height: 100%; }
 .toasts { position: fixed; bottom: 16px; right: 16px; z-index: 10; display: flex; flex-direction: column; gap: 8px; }
 .toast { background: #1c1c28; color: #fff; padding: 10px 14px; border-radius: 8px; cursor: pointer; font-size: 13px; }
 .auth-gate { max-width: 320px; margin: 15vh auto; display: flex; flex-direction: column; gap: 12px; }
