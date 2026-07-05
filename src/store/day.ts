@@ -66,8 +66,10 @@ export const useDayStore = create<DayStore>((set, get) => {
       try {
         const [activities, plan] = await Promise.all([api.fetchActivities(), api.ensureDayPlan(date)]);
         const entries = await api.fetchEntries(plan.id);
+        if (get().date !== date) return;
         set({ activities, dayPlanId: plan.id, entries, loading: false });
       } catch (err) {
+        if (get().date !== date) return;
         set({ loading: false });
         toast(`Load failed: ${(err as Error).message}`);
       }

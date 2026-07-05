@@ -124,6 +124,45 @@ test('concurrent mutations: second succeeds survives first failure', async () =>
   expect(useToastStore.getState().toasts).toHaveLength(1);
 });
 
+test('loadDay guards against a stale response clobbering a newer day', async () => {
+  let resolveFirstPlan!: (v: { id: string; user_id: string; date: string }) => void;
+  const firstPlanPromise = new Promise<{ id: string; user_id: string; date: string }>((resolve) => {
+    resolveFirstPlan = resolve;
+  });
+  let resolveSecondPlan!: (v: { id: string; user_id: string; date: string }) => void;
+  const secondPlanPromise = new Promise<{ id: string; user_id: string; date: string }>((resolve) => {
+    resolveSecondPlan = resolve;
+  });
+
+  mocked.ensureDayPlan.mockImplementation(async (date: string) => {
+    if (date === '2026-07-01') return firstPlanPromise;
+    return secondPlanPromise;
+  });
+  mocked.fetchEntries.mockImplementation(async (planId: string) => {
+    if (planId === 'plan-first') return [{ id: 'e-first', day_plan_id: 'plan-first', activity_id: 'a1', start_time: '09:00:00', duration_minutes: 60, done: false }];
+    return [{ id: 'e-second', day_plan_id: 'plan-second', activity_id: 'a2', start_time: '10:00:00', duration_minutes: 30, done: false }];
+  });
+
+  const firstLoad = useDayStore.getState().loadDay('2026-07-01');
+  const secondLoad = useDayStore.getState().loadDay('2026-07-02');
+
+  // Second (newer) request resolves first.
+  resolveSecondPlan({ id: 'plan-second', user_id: 'u', date: '2026-07-02' });
+  await secondLoad;
+
+  expect(useDayStore.getState().date).toBe('2026-07-02');
+  expect(useDayStore.getState().dayPlanId).toBe('plan-second');
+  expect(useDayStore.getState().entries.map((e) => e.id)).toEqual(['e-second']);
+
+  // Now the stale first request resolves after the newer one already landed.
+  resolveFirstPlan({ id: 'plan-first', user_id: 'u', date: '2026-07-01' });
+  await firstLoad;
+
+  expect(useDayStore.getState().date).toBe('2026-07-02');
+  expect(useDayStore.getState().dayPlanId).toBe('plan-second');
+  expect(useDayStore.getState().entries.map((e) => e.id)).toEqual(['e-second']);
+});
+
 test('dismiss adds id, loadDay resets dismissals', async () => {
   useDayStore.getState().dismiss('a9');
   expect(useDayStore.getState().dismissedIds).toEqual(['a9']);
