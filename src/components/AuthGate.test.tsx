@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import { vi, test, expect } from 'vitest';
 
-vi.mock('./lib/supabase', () => ({
+vi.mock('../lib/supabase', () => ({
   supabase: {
     auth: {
       getSession: vi.fn(async () => ({ data: { session: null } })),
@@ -12,9 +12,10 @@ vi.mock('./lib/supabase', () => ({
   },
 }));
 
-import App from './App';
+import { AuthGate } from './AuthGate';
 
-test('renders sign-in screen when logged out', async () => {
-  render(<App />);
+test('shows sign-in when no session', async () => {
+  render(<AuthGate><div>secret</div></AuthGate>);
   expect(await screen.findByText(/sign in/i)).toBeInTheDocument();
+  expect(screen.queryByText('secret')).not.toBeInTheDocument();
 });
