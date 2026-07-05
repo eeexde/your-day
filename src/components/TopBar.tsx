@@ -6,10 +6,12 @@ import { dayStats } from '../lib/stats';
 import type { Template } from '../types';
 import { supabase } from '../lib/supabase';
 
-function shiftDate(date: string, days: number): string {
-  const d = new Date(`${date}T00:00:00`);
+export function shiftDate(date: string, days: number): string {
+  const [y, m, day] = date.split('-').map(Number);
+  const d = new Date(y, m - 1, day);
   d.setDate(d.getDate() + days);
-  return d.toISOString().slice(0, 10);
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 }
 
 export function TopBar() {
