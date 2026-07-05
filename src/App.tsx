@@ -36,10 +36,16 @@ function Planner() {
 
   useEffect(() => {
     if (!('Notification' in window)) return;
-    if (Notification.permission === 'default') Notification.requestPermission();
-    if (Notification.permission !== 'granted') return;
-    const cancel = scheduleReminders(computeReminders(entries, activities, nowMinutesLocal()));
-    return cancel;
+    let cancel: (() => void) | undefined;
+    let disposed = false;
+    Notification.requestPermission().then(() => {
+      if (disposed || Notification.permission !== 'granted') return;
+      cancel = scheduleReminders(computeReminders(entries, activities, nowMinutesLocal()));
+    });
+    return () => {
+      disposed = true;
+      cancel?.();
+    };
   }, [entries, activities]);
 
   return (
