@@ -76,6 +76,54 @@ test('toggleDone flips done', async () => {
   expect(mocked.updateEntry).toHaveBeenCalledWith('e1', { done: true });
 });
 
+test('concurrent mutations: second succeeds survives first failure', async () => {
+  const e2: PlanEntry = { id: 'e2', day_plan_id: 'plan-1', activity_id: 'a2', start_time: '10:00:00', duration_minutes: 30, done: false };
+  useDayStore.setState({ entries: [seedEntry(), e2] });
+
+  // Control the timing with manually-resolved promises
+  // @ts-ignore - assigned in Promise constructor, used later
+  let resolveFirst: ((value: PlanEntry) => void) | null = null;
+  let rejectFirst: ((err: Error) => void) | null = null;
+  const firstPromise = new Promise<PlanEntry>((resolve, reject) => {
+    resolveFirst = resolve;
+    rejectFirst = reject;
+  });
+
+  let resolveSecond: ((value: PlanEntry) => void) | null = null;
+  const secondPromise = new Promise<PlanEntry>((resolve) => {
+    resolveSecond = resolve;
+  });
+
+  mocked.updateEntry.mockImplementation((id) => {
+    if (id === 'e1') return firstPromise;
+    if (id === 'e2') return secondPromise;
+    return Promise.reject(new Error('unknown id'));
+  });
+
+  // Start both mutations concurrently
+  const p1 = useDayStore.getState().moveEntry('e1', 600); // will fail
+  const p2 = useDayStore.getState().moveEntry('e2', 600); // will succeed
+
+  // After both are optimistically updated
+  expect(useDayStore.getState().entries[0].start_time).toBe('10:00'); // optimistic
+  expect(useDayStore.getState().entries[1].start_time).toBe('10:00'); // optimistic
+
+  // Resolve second FIRST (succeeds)
+  resolveSecond!({ ...e2, start_time: '10:00:00' });
+  await p2;
+  expect(useDayStore.getState().entries[1].start_time).toBe('10:00:00'); // second persisted
+
+  // Now reject first (after second succeeded)
+  rejectFirst!(new Error('network down'));
+  await p1;
+
+  // First should be rolled back to original
+  expect(useDayStore.getState().entries[0].start_time).toBe('09:00:00');
+  // Second should still have its successful update (NOT clobbered)
+  expect(useDayStore.getState().entries[1].start_time).toBe('10:00:00');
+  expect(useToastStore.getState().toasts).toHaveLength(1);
+});
+
 test('dismiss adds id, loadDay resets dismissals', async () => {
   useDayStore.getState().dismiss('a9');
   expect(useDayStore.getState().dismissedIds).toEqual(['a9']);

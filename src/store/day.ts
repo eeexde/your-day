@@ -33,13 +33,15 @@ export const useDayStore = create<DayStore>((set, get) => {
     local: Partial<PlanEntry>,
     remote: Parameters<typeof api.updateEntry>[1],
   ): Promise<void> {
-    const before = get().entries;
-    set({ entries: before.map((e) => (e.id === id ? { ...e, ...local } : e)) });
+    const previous = get().entries.find((e) => e.id === id);
+    set({ entries: get().entries.map((e) => (e.id === id ? { ...e, ...local } : e)) });
     try {
       const saved = await api.updateEntry(id, remote);
       set({ entries: get().entries.map((e) => (e.id === id ? saved : e)) });
     } catch (err) {
-      set({ entries: before });
+      if (previous) {
+        set({ entries: get().entries.map((e) => (e.id === id ? previous : e)) });
+      }
       toast(`Save failed: ${(err as Error).message}`);
     }
   }
@@ -98,12 +100,14 @@ export const useDayStore = create<DayStore>((set, get) => {
     },
 
     removeEntry: async (id) => {
-      const before = get().entries;
-      set({ entries: before.filter((e) => e.id !== id) });
+      const removed = get().entries.find((e) => e.id === id);
+      set({ entries: get().entries.filter((e) => e.id !== id) });
       try {
         await api.deleteEntry(id);
       } catch (err) {
-        set({ entries: before });
+        if (removed) {
+          set({ entries: [...get().entries, removed] });
+        }
         toast(`Delete failed: ${(err as Error).message}`);
       }
     },
