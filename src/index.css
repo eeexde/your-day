@@ -110,17 +110,24 @@ code {
   background: var(--code-bg);
 }
 
-:root {
-  --border: #e2e2ea;
-  --muted: #6b6b7b;
+.timeline-scroll {
+  overflow-y: auto;
+  height: 100%;
+  position: relative;
+  --timeline-border: #e2e2ea;
+  --timeline-muted: #6b6b7b;
 }
-* { box-sizing: border-box; }
-body { margin: 0; font-family: system-ui, sans-serif; }
 
-.timeline-scroll { overflow-y: auto; height: 100%; position: relative; }
-.timeline { position: relative; margin-left: 56px; border-left: 1px solid var(--border); }
-.hour-row { position: absolute; left: 0; right: 0; border-top: 1px solid var(--border); }
-.hour-label { position: absolute; left: -56px; top: -0.6em; font-size: 12px; color: var(--muted); width: 48px; text-align: right; }
+@media (prefers-color-scheme: dark) {
+  .timeline-scroll {
+    --timeline-border: #2e303a;
+    --timeline-muted: #9ca3af;
+  }
+}
+
+.timeline { position: relative; margin-left: 56px; border-left: 1px solid var(--timeline-border); }
+.hour-row { position: absolute; left: 0; right: 0; border-top: 1px solid var(--timeline-border); }
+.hour-label { position: absolute; left: -56px; top: -0.6em; font-size: 12px; color: var(--timeline-muted); width: 48px; text-align: right; }
 .now-line { position: absolute; left: 0; right: 0; border-top: 2px solid #e5484d; z-index: 3; pointer-events: none; }
 .entries-layer { position: absolute; inset: 0; }
 .entry-block { position: absolute; border-radius: 6px; color: #fff; padding: 4px 6px; font-size: 12px; overflow: hidden; z-index: 2; }
