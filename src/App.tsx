@@ -4,6 +4,7 @@ import { TopBar } from './components/TopBar';
 import { Timeline } from './components/Timeline';
 import { DayDnd } from './components/DayDnd';
 import { SuggestionsPanel } from './components/SuggestionsPanel';
+import { AutoplanButton } from './components/AutoplanButton';
 import { PoolPanel } from './components/PoolPanel';
 import { Toasts } from './components/Toasts';
 import { useDayStore } from './store/day';
@@ -60,6 +61,7 @@ function Planner() {
             <Timeline nowMinutes={nowMinutes} />
           </main>
           <aside className="right-pane">
+            <AutoplanButton nowMinutes={nowMinutes} />
             <SuggestionsPanel nowMinutes={nowMinutes} />
             <PoolPanel />
           </aside>
