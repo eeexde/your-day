@@ -18,6 +18,7 @@ interface DayStore {
   toggleDone: (id: string) => Promise<void>;
   removeEntry: (id: string) => Promise<void>;
   dismiss: (activityId: string) => void;
+  registerActivity: (activity: Activity) => void;
   addActivity: (input: NewActivity) => Promise<void>;
   editActivity: (id: string, patch: Partial<NewActivity>) => Promise<void>;
   archive: (id: string) => Promise<void>;
@@ -122,6 +123,9 @@ export const useDayStore = create<DayStore>((set, get) => {
     },
 
     dismiss: (activityId) => set((s) => ({ dismissedIds: [...s.dismissedIds, activityId] })),
+
+    registerActivity: (activity) =>
+      set((s) => ({ activities: sortActivitiesByPriority([...s.activities, activity]) })),
 
     addActivity: async (input) => {
       try {

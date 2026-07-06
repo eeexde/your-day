@@ -208,3 +208,14 @@ test('editActivity keeps pool sorted by priority then name after priority change
   expect(activities.map((a) => a.id)).toEqual(['a2', 'a1']);
   expect(activities.map((a) => a.priority)).toEqual([1, 2]);
 });
+
+test('registerActivity inserts into the pool sorted by priority', () => {
+  useDayStore.setState({ activities: [
+    { id: 'a1', user_id: 'u', name: 'Zeta', color: '#fff', priority: 3, default_duration_minutes: 60, fixed_start_time: null, is_archived: false },
+  ] });
+  useDayStore.getState().registerActivity({
+    id: 'a2', user_id: 'u', name: 'Alpha', color: '#fff', priority: 1, default_duration_minutes: 30, fixed_start_time: null, is_archived: false,
+  });
+  const names = useDayStore.getState().activities.map((a) => a.name);
+  expect(names).toEqual(['Alpha', 'Zeta']);
+});
