@@ -7,6 +7,7 @@ import { SuggestionsPanel } from './components/SuggestionsPanel';
 import { AutoplanButton } from './components/AutoplanButton';
 import { PoolPanel } from './components/PoolPanel';
 import { Toasts } from './components/Toasts';
+import { Onboarding, shouldOnboard } from './components/Onboarding';
 import { useDayStore } from './store/day';
 import { computeReminders, scheduleReminders } from './lib/reminders';
 
@@ -27,6 +28,11 @@ function Planner() {
   const date = useDayStore((s) => s.date);
   const [nowMinutes, setNowMinutes] = useState(nowMinutesLocal);
   const [view, setView] = useState<'day' | 'plan'>('day');
+  const [onboarding, setOnboarding] = useState(false);
+
+  useEffect(() => {
+    if (shouldOnboard()) setOnboarding(true);
+  }, []);
 
   useEffect(() => {
     loadDay(todayISO());
@@ -56,6 +62,7 @@ function Planner() {
     <DayDnd>
       <div className="app-shell">
         <TopBar />
+        {onboarding && <Onboarding nowMinutes={nowMinutes} onDone={() => setOnboarding(false)} />}
         <div className={`panes view-${view}`}>
           <main className="left-pane">
             <Timeline nowMinutes={nowMinutes} />
