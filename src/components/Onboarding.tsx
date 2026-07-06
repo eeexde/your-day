@@ -14,6 +14,7 @@ export function shouldOnboard(): boolean {
 export function Onboarding({ nowMinutes, onDone }: { nowMinutes: number; onDone: () => void }) {
   const date = useDayStore((s) => s.date);
   const activities = useDayStore((s) => s.activities);
+  const loading = useDayStore((s) => s.loading);
   const addEntry = useDayStore((s) => s.addEntry);
   const registerActivity = useDayStore((s) => s.registerActivity);
   const push = useToastStore((s) => s.push);
@@ -58,7 +59,7 @@ export function Onboarding({ nowMinutes, onDone }: { nowMinutes: number; onDone:
         />
         <div className="onboarding-actions">
           <button onClick={finish} disabled={busy}>Skip</button>
-          <button onClick={submit} disabled={busy || !text.trim()}>
+          <button onClick={submit} disabled={busy || loading || !text.trim()}>
             {busy ? 'Planning…' : 'Create my day'}
           </button>
         </div>

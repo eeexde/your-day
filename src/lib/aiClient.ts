@@ -15,8 +15,12 @@ async function callFunction(system: string, user: string, correction?: string): 
 }
 
 function parse(content: string): PlanResponse {
-  const cleaned = content.replace(/^```(?:json)?/i, '').replace(/```$/, '').trim();
-  return validatePlanResponse(JSON.parse(cleaned));
+  // Extract the first balanced-looking JSON object, tolerating code fences or
+  // surrounding prose the model may wrap around it.
+  const start = content.indexOf('{');
+  const end = content.lastIndexOf('}');
+  if (start === -1 || end === -1 || end < start) throw new Error('no JSON object in content');
+  return validatePlanResponse(JSON.parse(content.slice(start, end + 1)));
 }
 
 export async function requestPlan(mode: PlanMode, input: PlanInput): Promise<PlanResponse> {

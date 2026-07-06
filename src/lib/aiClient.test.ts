@@ -33,6 +33,16 @@ test('strips accidental code fences before parsing', async () => {
   expect(plan.placements).toHaveLength(1);
 });
 
+test('extracts the JSON object when the model wraps it in prose', async () => {
+  invoke.mockResolvedValue({
+    data: { content: 'Sure! Here is your plan:\n{"placements":[{"activity_id":"a1","start_time":"07:00","duration_minutes":60}]}\nHope that helps.' },
+    error: null,
+  });
+  const plan = await requestPlan('plan', input);
+  expect(plan.placements).toHaveLength(1);
+  expect(invoke).toHaveBeenCalledTimes(1);
+});
+
 test('retries once with a correction when the first reply is invalid', async () => {
   invoke
     .mockResolvedValueOnce({ data: { content: 'not json at all' }, error: null })
