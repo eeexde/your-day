@@ -14,6 +14,8 @@ dist-ssr
 
 # Env files
 .env
+supabase/functions/.env
+supabase/.env
 
 # Scratch dir (not part of the app)
 .superpowers/
