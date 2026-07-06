@@ -495,3 +495,45 @@ input[type='color'] { width: 42px; height: 28px; border-radius: 6px; cursor: poi
 @media (prefers-reduced-motion: reduce) {
   * { animation: none !important; transition: none !important; }
 }
+
+.autoplan {
+  width: 100%;
+  margin-bottom: 0.5rem;
+  padding: 0.5rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.autoplan:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.onboarding-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 100;
+  padding: 1rem;
+}
+.onboarding-card {
+  background: var(--card-bg, #fff);
+  color: inherit;
+  max-width: 32rem;
+  width: 100%;
+  padding: 1.5rem;
+  border-radius: 0.75rem;
+}
+.onboarding-card textarea {
+  width: 100%;
+  margin: 0.75rem 0;
+  padding: 0.5rem;
+  font: inherit;
+}
+.onboarding-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
