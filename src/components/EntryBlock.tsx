@@ -2,6 +2,7 @@ import { useRef, type PointerEvent } from 'react';
 import { useDraggable } from '@dnd-kit/core';
 import type { Activity, PlanEntry } from '../types';
 import { formatRange, snapMinutes, timeToMinutes, SNAP_MINUTES } from '../lib/time';
+import { readableTextColor } from '../lib/color';
 import { useDayStore } from '../store/day';
 
 export const PX_PER_MINUTE = 1;
@@ -19,6 +20,8 @@ export function EntryBlock({ entry, activity, col, colCount }: Props) {
   const resizeEntry = useDayStore((s) => s.resizeEntry);
   const start = timeToMinutes(entry.start_time);
   const width = 100 / colCount;
+  const fg = readableTextColor(activity.color);
+  const onLight = fg !== '#ffffff';
   const resizeStart = useRef<{ y: number; duration: number } | null>(null);
 
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
@@ -42,7 +45,7 @@ export function EntryBlock({ entry, activity, col, colCount }: Props) {
   return (
     <div
       ref={setNodeRef}
-      className={`entry-block${entry.done ? ' done' : ''}`}
+      className={`entry-block${entry.done ? ' done' : ''}${onLight ? ' on-light' : ''}`}
       data-entry-id={entry.id}
       style={{
         top: start * PX_PER_MINUTE,
@@ -50,6 +53,7 @@ export function EntryBlock({ entry, activity, col, colCount }: Props) {
         left: `${col * width}%`,
         width: `${width}%`,
         background: activity.color,
+        color: fg,
         transform: transform ? `translate(${transform.x}px, ${transform.y}px)` : undefined,
       }}
     >
