@@ -344,7 +344,9 @@ Create `src/lib/aiClient.test.ts`:
 ```ts
 import { beforeEach, expect, test, vi } from 'vitest';
 
-const invoke = vi.fn();
+// vi.mock is hoisted above top-level consts; Vitest only lets a hoisted factory
+// reference handles created via vi.hoisted (or names prefixed with "mock").
+const { invoke } = vi.hoisted(() => ({ invoke: vi.fn() }));
 vi.mock('./supabase', () => ({ supabase: { functions: { invoke } } }));
 
 import { requestPlan } from './aiClient';
@@ -804,10 +806,11 @@ Create `src/components/AutoplanButton.test.tsx`:
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { beforeEach, expect, test, vi } from 'vitest';
 
+// vi.mock is hoisted above top-level consts; share handles via vi.hoisted.
+const { requestPlan, applyPlan, push } = vi.hoisted(() => ({ requestPlan: vi.fn(), applyPlan: vi.fn(), push: vi.fn() }));
+
 vi.mock('../api', () => ({ createActivity: vi.fn() }));
-const requestPlan = vi.fn();
 vi.mock('../lib/aiClient', () => ({ requestPlan }));
-const applyPlan = vi.fn();
 vi.mock('../lib/applyPlan', () => ({ applyPlan }));
 
 vi.mock('../store/day', async () => {
@@ -821,7 +824,6 @@ vi.mock('../store/day', async () => {
   return { useDayStore: store };
 });
 
-const push = vi.fn();
 vi.mock('../store/toast', async () => {
   const { create } = await import('zustand');
   const store = create(() => ({ push }));
@@ -958,10 +960,11 @@ Create `src/components/Onboarding.test.tsx`:
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { beforeEach, expect, test, vi } from 'vitest';
 
+// vi.mock is hoisted above top-level consts; share handles via vi.hoisted.
+const { requestPlan, applyPlan } = vi.hoisted(() => ({ requestPlan: vi.fn(), applyPlan: vi.fn() }));
+
 vi.mock('../api', () => ({ createActivity: vi.fn() }));
-const requestPlan = vi.fn();
 vi.mock('../lib/aiClient', () => ({ requestPlan }));
-const applyPlan = vi.fn();
 vi.mock('../lib/applyPlan', () => ({ applyPlan }));
 
 vi.mock('../store/day', async () => {
